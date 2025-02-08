@@ -8,9 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from abc import ABC, abstractmethod
 
-from sushi.tuna.dbs.base import BaseDB
-
-DATABASE_URL = "postgresql://username:password@localhost/dbname"
+from tuna.dbs.base import BaseDB
 
 class Config(ABC):
     POSTGRES_USERNAME = "postgres"
@@ -26,8 +24,8 @@ class Config(ABC):
 class PostgresDB(BaseDB):
     def __init__(self) -> None:
         super().__init__()
-        self.async_engine = create_async_engine(
-            self.get_connection_string(),
+        self._async_engine = create_async_engine(
+            self._get_connection_string(),
             echo=Config.SQL_COMMAND_ECHO,
             pool_size=15,        # Optimal pool size based on your tests
             max_overflow=5,      # Temporary connections beyond pool_size
@@ -35,12 +33,12 @@ class PostgresDB(BaseDB):
             pool_recycle=1800    # Recycle connections to avoid stale ones
         )
 
-    def get_connection_string(driver: str = "asyncpg") -> str:
+    def _get_connection_string(driver: str = "asyncpg") -> str:
         return f"postgresql+{driver}://{Config.POSTGRES_USERNAME}:{Config.POSTGRES_PASSWORD}@{Config.POSTGRES_HOST}:{Config.POSTGRES_PORT}/{Config.POSTGRES_DB_NAME}"
 
     def create_db(self)->Session:
-        return sessionmaker(self.async_engine, class_=AsyncSession)
+        return sessionmaker(self._async_engine, class_=AsyncSession)
     
     def dispose(self):
-        return self.async_engine.dispose()
+        return self._async_engine.dispose()
         

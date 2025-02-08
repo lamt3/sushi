@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["lamt3 <lamtomoki@gmail.com>"]
 readme = "README.md"
+packages = [{include = "tuna"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

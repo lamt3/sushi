@@ -1,5 +1,5 @@
 
-from sushi.tuna.dao.company_dao import CompanyDAO
+from tuna.dao.company_dao import CompanyDAO
 
 
 class HomeService:
@@ -7,4 +7,5 @@ class HomeService:
         self.company_dao = company_dao
 
     def get_home(self):
+        
         print('hi')

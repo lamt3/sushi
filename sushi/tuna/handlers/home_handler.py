@@ -1,9 +1,10 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import APIRouter
+
+from tuna.services.home_service import HomeService
 
 class HomeHandler:
-    def __init__(self):
-        self.router = APIRouter()
-        self.router.add_api_route("/hello", self.hello, methods=["GET"])
+    # def __init__(self):
+        # self.hs = hs
 
-    def hello(self):
-        return {"Hello": "jo"}
+    def health(self):
+        return {"Health": "OK"}

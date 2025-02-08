@@ -1,8 +1,9 @@
 from fastapi import FastAPI, APIRouter
-# from sushi.tuna.dao.company_dao import CompanyDAO
-# from sushi.tuna.dbs.postgres import PostgresDB
+from tuna.dbs.base import BaseDB
+from tuna.dao.company_dao import CompanyDAO
+from tuna.dbs.postgres import PostgresDB
 from tuna.handlers.home_handler import HomeHandler
-# from sushi.tuna.services.home_service import HomeService
+from tuna.services.home_service import HomeService
 
 
 
@@ -12,14 +13,18 @@ def initialize():
     # pg_db = PostgresDB()
     # company_dao = CompanyDAO(db=pg_db)
     # home_service = HomeService(company_dao)
+    home_handler = HomeHandler()
 
     @app.on_event("shutdown")
     def shutdown():
         # cleanup
         print('shutting down')
         # pg_db.dispose()
-    home_handler = HomeHandler()
-    app.include_router(home_handler.router)
+
+   
+    routes = APIRouter(prefix="/api/v1")
+    routes.add_api_route("/health", home_handler.health, methods=["GET"])
+    app.include_router(routes)
     return app
 
 app = initialize()
