@@ -7,4 +7,4 @@ class HomeHandler:
         # self.hs = hs
 
     def health(self):
-        return {"Health": "OK"}
+        return {"Health": "OK!"}
