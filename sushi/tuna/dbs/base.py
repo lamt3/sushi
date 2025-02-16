@@ -7,5 +7,9 @@ class BaseDB(ABC):
         pass
 
     @abstractmethod
-    def dispose(self):
+    async def test_connection(self):
+        pass
+    
+    @abstractmethod
+    async def dispose(self):
         pass
