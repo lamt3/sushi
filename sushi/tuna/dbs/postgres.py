@@ -33,8 +33,16 @@ class PostgresDB(BaseDB):
         #     database=self.database,
         #     query={"unix_socket": self.host}
         # )
+        connection_params = {
+            "username": self.user,
+            "password": self.password,
+            "port": self.port,
+            "database": self.database,
+            "drivername": "postgresql+asyncpg",
+            "host": self.host
+        }
         self._async_engine = create_async_engine(
-            self._get_connection_string(),
+            # self._get_connection_string(),
             # sqlalchemy.engine.url.URL.create(
             #     drivername="postgresql+asyncpg",            
             #     username=self.user,
@@ -43,6 +51,7 @@ class PostgresDB(BaseDB):
             #     port=self.port,
             #     query={"unix_socket": self.host}
             # ),
+            connection_params,
             echo=Config.SQL_COMMAND_ECHO,
             pool_size=15,
             max_overflow=5,
