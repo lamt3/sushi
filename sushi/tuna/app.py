@@ -29,7 +29,11 @@ def initialize():
     @app.on_event("startup")
     async def startup():
         try:
-            logger.info("starting db connection...")
+            print('STARTING DB...')
+            print("hostname: " + pg_db.host)
+            print("pw: " + pg_db.password)
+            print("user: " + pg_db.user)
+            print("db: " + pg_db.database)
             await pg_db.test_connection()
             # Store db instance where needed
         except Exception as e:
