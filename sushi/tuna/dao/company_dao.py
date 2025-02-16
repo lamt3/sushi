@@ -11,6 +11,7 @@ class CompanyDAO:
             async with self.db() as session:
                 return await session.execute(text("SELECT * FROM TEST"))
         except Exception as e:
+            print('error in CompanyDAO get_company()...')
             print(e)
         
         

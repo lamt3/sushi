@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 import asyncpg
 import logging
 from tuna.config import Config
+import sqlalchemy
 
 from tuna.dbs.base import BaseDB
 
@@ -25,8 +26,23 @@ class PostgresDB(BaseDB):
         self.pool = None
         
         # Keep SQLAlchemy engine for other operations
+        sqlalchemy.engine.url.URL.create(
+            drivername="postgresql+asyncpg",            
+            username=self.user,
+            password=self.password,
+            database=self.database,
+            query={"unix_socket": self.host}
+        )
         self._async_engine = create_async_engine(
-            self._get_connection_string(),
+            # self._get_connection_string(),
+            sqlalchemy.engine.url.URL.create(
+                drivername="postgresql+asyncpg",            
+                username=self.user,
+                password=self.password,
+                database=self.database,
+                port=self.port,
+                query={"unix_socket": self.host}
+            ),
             echo=Config.SQL_COMMAND_ECHO,
             pool_size=15,
             max_overflow=5,
