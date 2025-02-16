@@ -1,12 +1,12 @@
 from tuna.dbs.base import BaseDB
 from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 class CompanyDAO:
-    def __init__(self, db: BaseDB) -> None:
-        self.db = db.create_db()
+    def __init__(self, db: Session) -> None:
+        self.db = db
 
     async def get_company(self):
-        print('hi')
         try:
             async with self.db() as session:
                 return await session.execute(text("SELECT * FROM TEST"))

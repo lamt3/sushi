@@ -5,16 +5,22 @@ from tuna.dao.company_dao import CompanyDAO
 from tuna.dbs.postgres import PostgresDB
 from tuna.handlers.home_handler import HomeHandler
 from tuna.services.home_service import HomeService
+from tuna.config import setup_logging
 import logging
 
 logger = logging.getLogger(__name__)
 
 def initialize():
+    # Setup logging first
+    setup_logging()
+    
     app = FastAPI()
+    logger.info("Initializing application...") 
 
     pg_db = PostgresDB()
-    # pg_db.try_connection()
-    company_dao = CompanyDAO(db=pg_db)
+    session = pg_db.create_db()
+  
+    company_dao = CompanyDAO(db=session)
     home_service = HomeService(company_dao)
     home_handler = HomeHandler(home_service)
 
@@ -22,20 +28,15 @@ def initialize():
 
     @app.on_event("shutdown")
     async def shutdown():
-        # cleanup
-        print('shutting down')
+        logger.info("Shutting down application...")
         await pg_db.dispose()
 
     @app.on_event("startup")
     async def startup():
         try:
-            print('STARTING DB...')
-            print("hostname: " + pg_db.host)
-            print("pw: " + pg_db.password)
-            print("user: " + pg_db.user)
-            print("db: " + pg_db.database)
+            logger.info("Testing database connection...")
             await pg_db.test_connection()
-            # Store db instance where needed
+            logger.info("Database connection successful")
         except Exception as e:
             logger.error(f"Failed to initialize database: {e}")
             raise
