@@ -26,23 +26,23 @@ class PostgresDB(BaseDB):
         self.pool = None
         
         # Keep SQLAlchemy engine for other operations
-        sqlalchemy.engine.url.URL.create(
-            drivername="postgresql+asyncpg",            
-            username=self.user,
-            password=self.password,
-            database=self.database,
-            query={"unix_socket": self.host}
-        )
+        # sqlalchemy.engine.url.URL.create(
+        #     drivername="postgresql+asyncpg",            
+        #     username=self.user,
+        #     password=self.password,
+        #     database=self.database,
+        #     query={"unix_socket": self.host}
+        # )
         self._async_engine = create_async_engine(
-            # self._get_connection_string(),
-            sqlalchemy.engine.url.URL.create(
-                drivername="postgresql+asyncpg",            
-                username=self.user,
-                password=self.password,
-                database=self.database,
-                port=self.port,
-                query={"unix_socket": self.host}
-            ),
+            self._get_connection_string(),
+            # sqlalchemy.engine.url.URL.create(
+            #     drivername="postgresql+asyncpg",            
+            #     username=self.user,
+            #     password=self.password,
+            #     database=self.database,
+            #     port=self.port,
+            #     query={"unix_socket": self.host}
+            # ),
             echo=Config.SQL_COMMAND_ECHO,
             pool_size=15,
             max_overflow=5,
@@ -68,8 +68,8 @@ class PostgresDB(BaseDB):
             await self.init_pool()
         try:
             async with self.pool.acquire() as conn:
-                await conn.execute('SELECT 1')
-                logger.info("db started successfully")
+                await conn.execute('SELECT * FROM TEST')
+                print("db started successfully")
             return True
         except Exception as e:
             logger.error(f"Database connection test failed: {e}")
