@@ -41,3 +41,8 @@ class Config:
     POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
     POSTGRES_DB_NAME = os.getenv("POSTGRES_DB_NAME", "postgres")
     SQL_COMMAND_ECHO = os.getenv("SQL_COMMAND_ECHO", "False").lower() == "true" 
+
+    # fb configs
+    FB_REDIRECT_URI = os.getenv("FB_REDIRECT_URI")
+    FB_CLIENT_ID = os.getenv("FB_CLIENT_ID")
+    FB_CLIENT_SECRET = os.getenv("FB_CLIENT_SECRET")
