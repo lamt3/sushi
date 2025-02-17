@@ -41,8 +41,6 @@ class FacebookOAuthService(AdOAuthService):
             "scope": "ads_read,ads_management,read_insights",
             "response_type": "code",
         }
-        print("here")
-        print(Config.FB_REDIRECT_URI)
         url = requests.Request("GET", self.AUTH_URL, params=params).prepare().url
         return url
 
@@ -63,8 +61,6 @@ class FacebookOAuthService(AdOAuthService):
         access_token = response_data["access_token"]
         expires_in = response_data.get("expires_in", 3600)
         expires_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_in)
-
-        print(access_token)
 
         return {"access_token": access_token, "expires_at": expires_at}
 

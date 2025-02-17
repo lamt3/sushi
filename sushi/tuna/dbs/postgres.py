@@ -11,7 +11,7 @@ import logging
 from tuna.config import Config
 import sqlalchemy
 from sqlalchemy import text
-
+from sqlalchemy.ext.asyncio import AsyncSession
 from tuna.dbs.base import BaseDB
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class PostgresDB(BaseDB):
             pool_recycle=1800
         )
 
-    def create_db(self)->Session:
+    def create_db(self)->AsyncSession:
         return sessionmaker(self._async_engine, class_=AsyncSession)
     
     async def dispose(self):

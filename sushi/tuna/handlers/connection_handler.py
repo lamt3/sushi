@@ -1,7 +1,7 @@
 from tuna.integrations.destinations.connection import AdToken, get_oauth_service
 from fastapi.responses import RedirectResponse
 from fastapi import HTTPException
-import asyncio
+
 
 class ConnectionHandler:
     # def __init__(self):

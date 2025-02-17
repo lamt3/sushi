@@ -1,8 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from tuna.handlers.connection_handler import ConnectionHandler
-from tuna.dbs.base import BaseDB
-from tuna.dao.company_dao import CompanyDAO
+from tuna.dao.member_dao import MemberDAO
 from tuna.dbs.postgres import PostgresDB
 from tuna.handlers.home_handler import HomeHandler
 from tuna.services.home_service import HomeService
@@ -22,7 +21,7 @@ def initialize():
     pg_db = PostgresDB()
     session = pg_db.create_db()
   
-    company_dao = CompanyDAO(db=session)
+    company_dao = MemberDAO(db=session)
     home_service = HomeService(company_dao)
     home_handler = HomeHandler(home_service)
 
@@ -46,7 +45,7 @@ def initialize():
 
 
     origins = [
-        "http://localhost:*",  # React dev server
+        "http://localhost:3000",  # React dev server
         "https://figsprout.netlify.app*"  # Add production domain
     ]
 
@@ -57,13 +56,10 @@ def initialize():
         allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
         allow_headers=["*"],  # Allow all headers
     )
-    
-
 
     routes = APIRouter(prefix="/api/v1")
     routes.add_api_route("/health", home_handler.health, methods=["GET"])
-
-
+    routes.add_api_route("/login", home_handler.login_member, methods=["POST"])
 
     #Connection Routes
     routes.add_api_route("/destination/oauth/{ad_platform}", connection_handler.get_auth_url, methods=["GET"])

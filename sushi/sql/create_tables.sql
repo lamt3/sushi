@@ -1,19 +1,21 @@
-CREATE TABLE organization (
-    id SERIAL PRIMARY KEY,          -- Auto-incrementing primary key
-    name VARCHAR(100) NOT NULL    -- Organization name
+CREATE TABLE organizations (
+    organization_id SERIAL PRIMARY KEY,          
+    name VARCHAR(100) NOT NULL,     
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Create the member table
-CREATE TABLE member (
-    id SERIAL PRIMARY KEY,          -- Auto-incrementing primary key
-    first_name VARCHAR(100) NOT NULL, -- Member's first name
-    last_name VARCHAR(100) NOT NULL,  -- Member's last name
-    email VARCHAR(120) UNIQUE NOT NULL, -- Member's email (must be unique)
-    jwt_token VARCHAR(255),        -- JWT token for authentication
-    access VARCHAR(50) NOT NULL,   -- Access level (e.g., 'admin' or 'normal')
-    organization_id INT NOT NULL,  -- Foreign key to the organization table
+CREATE TABLE members (
+    member_id SERIAL PRIMARY KEY,          
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(120) UNIQUE NOT NULL,  
+    member_type VARCHAR(50) NOT NULL,
+    organization_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_organization
         FOREIGN KEY (organization_id)
-        REFERENCES organization(id)
-        ON DELETE CASCADE           -- If the organization is deleted, delete its members
+        REFERENCES organizations(organization_id)
+        ON DELETE CASCADE           
 );
