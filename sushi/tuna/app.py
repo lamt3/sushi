@@ -46,7 +46,7 @@ def initialize():
 
     origins = [
         "http://localhost:3000",  # React dev server
-        "https://figsprout.netlify.app" 
+        "https://figsprout.netlify.app", 
         "https://figsprout.netlify.app*"  # Add production domain
     ]
 
