@@ -1,8 +1,8 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from tuna.dbs.base import get_db
 from tuna.handlers.connection_handler import ConnectionHandler
 from tuna.dao.member_dao import MemberDAO
-from tuna.dbs.postgres import PostgresDB
 from tuna.handlers.home_handler import HomeHandler
 from tuna.services.home_service import HomeService
 from tuna.config import setup_logging
@@ -18,7 +18,7 @@ def initialize():
     app = FastAPI()
     logger.info("Initializing application...") 
 
-    pg_db = PostgresDB()
+    pg_db = get_db("postgres")
     session = pg_db.create_db()
   
     company_dao = MemberDAO(db=session)

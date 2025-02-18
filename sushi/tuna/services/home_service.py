@@ -13,7 +13,7 @@ class HomeService:
     async def get_home(self):
         return await self.mdao.test()
     
-    async def login_member(self, google_access_token:str):
+    async def login_member(self, google_access_token:str)->MemberDTO:
         resp = requests.get(
                 url = "https://www.googleapis.com/oauth2/v3/userinfo", 
                 headers={"Authorization": f"Bearer {google_access_token}"}
@@ -25,5 +25,7 @@ class HomeService:
         
         google_user = resp.json()
         member = MemberDTO.from_google_user(google_user)
-        return await self.mdao.insert_member(member)
+        member_id = await self.mdao.insert_member(member)
+        member.member_id = member_id
+        return member
         

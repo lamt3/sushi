@@ -10,7 +10,7 @@ class AdToken:
 
 class AdOAuthService(ABC):
     @abstractmethod
-    def get_auth_url(self)->str:
+    def get_auth_url(self, callback_url)->str:
         pass
 
     @abstractmethod
@@ -33,13 +33,14 @@ class FacebookOAuthService(AdOAuthService):
     CLIENT_ID = Config.FB_CLIENT_ID
     CLIENT_SECRET = Config.FB_CLIENT_SECRET
 
-    def get_auth_url(self)->str:
+    def get_auth_url(self, callback_url)->str:
         """Generate Facebook OAuth authorization URL"""
         params = {
             "client_id":Config.FB_CLIENT_ID,
             "redirect_uri":  Config.FB_REDIRECT_URI,
             "scope": "ads_read,ads_management,read_insights",
             "response_type": "code",
+            "state": callback_url
         }
         url = requests.Request("GET", self.AUTH_URL, params=params).prepare().url
         return url
