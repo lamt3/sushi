@@ -14,9 +14,23 @@ logger = logging.getLogger(__name__)
 def initialize():
     # Setup logging first
     setup_logging()
-    
+
     app = FastAPI()
+    
     logger.info("Initializing application...") 
+
+    origins = [
+        "http://localhost:3000",  # React dev server
+        "https://figsprout.netlify.app"
+    ]
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,  # Allow only specified origins
+        allow_credentials=True,  # Allow cookies/auth headers
+        allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
+        allow_headers=["*"],  # Allow all headers
+    )
 
     pg_db = get_db("postgres")
     session = pg_db.create_db()
@@ -44,19 +58,7 @@ def initialize():
 
 
 
-    origins = [
-        "http://localhost:3000",  # React dev server
-        "https://figsprout.netlify.app", 
-        "https://figsprout.netlify.app*"  # Add production domain
-    ]
-
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=origins,  # Allow only specified origins
-        allow_credentials=True,  # Allow cookies/auth headers
-        allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
-        allow_headers=["*"],  # Allow all headers
-    )
+   
 
     routes = APIRouter(prefix="/api/v1")
     routes.add_api_route("/health", home_handler.health, methods=["GET"])
