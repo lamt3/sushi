@@ -38,7 +38,7 @@ class HomeHandler:
                 key="token",
                 value=jwt_token,
                 httponly=True,
-                secure=False,
+                secure=True,
                 samesite="lax",
                 max_age=15767999,
                 path="/",
