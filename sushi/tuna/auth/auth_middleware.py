@@ -15,13 +15,14 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 async def auth_middleware(request: Request, call_next):
     # List of paths that don't need authentication
-    public_paths = ["/login", "/health"]
+    public_paths = ["/api/v1/login", "/api/v1/health"]
     
     if request.url.path in public_paths:
         return await call_next(request)
 
     try:
         token = request.cookies.get("token")
+        print(token)
         if not token:
             logger.error(f"Auth Middleware - No Cookie")
             raise HTTPException(status_code=401, detail="Authentication Failed. Please Re-Login")

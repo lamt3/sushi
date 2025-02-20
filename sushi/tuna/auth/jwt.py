@@ -13,7 +13,7 @@ def create_jwt_token(member: MemberDTO) -> str:
     expire = datetime.utcnow() + timedelta(minutes=Config.ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode = {
-        "sub": str(member.member_id),
+        "member_id": member.member_id,
         "email": member.email,
         "first_name": member.first_name,
         "last_name": member.last_name,

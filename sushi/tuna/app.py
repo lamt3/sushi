@@ -67,6 +67,7 @@ def initialize():
     routes = APIRouter(prefix="/api/v1")
     routes.add_api_route("/health", home_handler.health, methods=["GET"])
     routes.add_api_route("/login", home_handler.login_member, methods=["POST"])
+    routes.add_api_route("/auth/status", home_handler.verify_auth, methods=["GET"])
     routes.add_api_route("/dashboard", home_handler.get_dashboard, methods=["GET"])
 
     #Connection Routes

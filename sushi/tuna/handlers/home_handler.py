@@ -22,6 +22,10 @@ class HomeHandler:
     async def health(self):
         return await self.hs.get_home()
     
+    async def verify_auth(self, request: Request):
+        return request.state.user
+        # return {"status": "ok"}
+    
     async def login_member(self, request: GoogleAuthTokenRequest, response:Response):
         try:
             if request == None or request.token == None or request.token == "":
