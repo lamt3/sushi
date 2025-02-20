@@ -46,3 +46,8 @@ class Config:
     FB_REDIRECT_URI = os.getenv("FB_REDIRECT_URI")
     FB_CLIENT_ID = os.getenv("FB_CLIENT_ID")
     FB_CLIENT_SECRET = os.getenv("FB_CLIENT_SECRET")
+
+    #jwt configs
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key")
+    JWT_ALGORITHM = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES = 262800

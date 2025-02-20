@@ -11,6 +11,16 @@ class MemberDTO:
         self.last_name=last_name
         self.member_type=member_type
 
+    def to_json(self):
+        return  {
+            "member_id": self.member_id,
+            "email": self.email,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "member_type": self.member_type
+            # Add other attributes
+        }
+
     @staticmethod
     def from_google_user(google_user):
         return MemberDTO(

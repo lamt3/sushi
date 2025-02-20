@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from tuna.auth.auth_middleware import auth_middleware
 from tuna.dbs.base import get_db
 from tuna.handlers.connection_handler import ConnectionHandler
 from tuna.dao.member_dao import MemberDAO
@@ -30,7 +31,10 @@ def initialize():
         allow_credentials=True,  # Allow cookies/auth headers
         allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
         allow_headers=["*"],  # Allow all headers
+        expose_headers=["*"]
     )
+
+    app.middleware("http")(auth_middleware)
 
     pg_db = get_db("postgres")
     session = pg_db.create_db()
@@ -63,6 +67,7 @@ def initialize():
     routes = APIRouter(prefix="/api/v1")
     routes.add_api_route("/health", home_handler.health, methods=["GET"])
     routes.add_api_route("/login", home_handler.login_member, methods=["POST"])
+    routes.add_api_route("/dashboard", home_handler.get_dashboard, methods=["GET"])
 
     #Connection Routes
     routes.add_api_route("/destination/oauth/{ad_platform}", connection_handler.get_auth_url, methods=["GET"])
