@@ -41,7 +41,7 @@ class HomeHandler:
                 secure=False,
                 samesite="lax",
                 max_age=15767999,
-                path="/"
+                path="/",
             )
             
             # Set the response body

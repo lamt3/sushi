@@ -25,6 +25,8 @@ def initialize():
         "https://figsprout.netlify.app"
     ]
 
+    app.middleware("http")(auth_middleware)
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,  # Allow only specified origins
@@ -34,7 +36,7 @@ def initialize():
         expose_headers=["*"]
     )
 
-    app.middleware("http")(auth_middleware)
+    
 
     pg_db = get_db("postgres")
     session = pg_db.create_db()
