@@ -13,11 +13,11 @@ class AdDAO:
     async def insert_ad_platform(self, organization_id: int, adc: AdConnectionDTO):
         query = """
         INSERT INTO ad_platforms (
-            organization_id,
-            ad_platform_name,
-            access_token,
-            access_token_expiry,
-            refresh_token
+        organization_id,
+        ad_platform_name,
+        access_token,
+        access_token_expiry,
+        refresh_token
         ) VALUES (
             :organization_id,
             :ad_platform_name,
@@ -25,6 +25,11 @@ class AdDAO:
             :access_token_expiry,
             :refresh_token
         )
+        ON CONFLICT (organization_id, ad_platform_name) 
+        DO UPDATE SET
+            access_token = EXCLUDED.access_token,
+            access_token_expiry = EXCLUDED.access_token_expiry,
+            refresh_token = EXCLUDED.refresh_token;
         """
 
         params = adc.to_json()

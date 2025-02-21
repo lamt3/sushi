@@ -109,11 +109,9 @@ class QueryBuilder:
     
     async def execute_write(self)->bool:
         try:
-            session: AsyncSession = self._session
-            async with session as s:
-                async with s.begin():
-                    await session.execute(text(self._query), self._params)
-                    await s.commit()
+            async with self._session as s:
+                await s.execute(text(self._query), self._params)
+                await s.commit()
         except Exception as e:
             logger.error(f"Failed Write Query: {self._query} With Error: {str(e)}")
             raise Exception(f"Failed Write Query: {str(e)} ")

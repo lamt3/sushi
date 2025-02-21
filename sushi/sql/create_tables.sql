@@ -31,5 +31,9 @@ CREATE TABLE ad_platforms (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE ad_platforms
+ADD CONSTRAINT unique_organization_ad_platform
+UNIQUE (organization_id, ad_platform_name);
+
 CREATE INDEX idx_ad_platforms_organization_id 
 ON ad_platforms (organization_id);

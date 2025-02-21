@@ -13,7 +13,7 @@ class AdService:
         return client.get_auth_url(callback_url)
         
     async def add_oauth_connection(self, organization_id: int, ad_platform: str, code: str):
-        client: AdOAuthClient = AdOAuthClient.get_oauth_service(ad_platform)
+        client: AdOAuthClient = AdOAuthClient.get_client(ad_platform)
         if client == None:
             raise Exception(detail=f"ad_platform: {ad_platform} not found")
         
