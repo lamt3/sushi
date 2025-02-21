@@ -25,7 +25,9 @@ class HomeService:
         
         google_user = resp.json()
         member = MemberDTO.from_google_user(google_user)
-        member_id = await self.mdao.insert_member(member)
-        member.member_id = member_id
+        m = await self.mdao.insert_member(member)
+        member.member_id = m["member_id"]
+        member.organization_id = m["organization_id"]
+        member.organization_name = m["organization_name"]
         return member
         

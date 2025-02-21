@@ -1,5 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from tuna.services.ad_service import AdService
+from tuna.dao.ad_dao import AdDAO
 from tuna.auth.auth_middleware import auth_middleware
 from tuna.dbs.base import get_db
 from tuna.handlers.connection_handler import ConnectionHandler
@@ -35,9 +37,7 @@ def initialize():
         allow_headers=["*"],  # Allow all headers
         expose_headers=["*"]
     )
-
     
-
     pg_db = get_db("postgres")
     session = pg_db.create_db()
   
@@ -45,7 +45,9 @@ def initialize():
     home_service = HomeService(company_dao)
     home_handler = HomeHandler(home_service)
 
-    connection_handler = ConnectionHandler()
+    ad_dao = AdDAO(db=session)
+    ad_service = AdService(ad_dao=ad_dao)
+    connection_handler = ConnectionHandler(ad_service)
 
     @app.on_event("shutdown")
     async def shutdown():

@@ -4,10 +4,11 @@ from abc import ABC, abstractmethod
 
 import logging
 import sqlalchemy
-from sqlalchemy import text
+from sqlalchemy import text, Result
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from tuna.config import Config
+from typing import TypeVar, Optional, Callable, Any
 
 
 logger = logging.getLogger(__name__)
@@ -75,3 +76,52 @@ class PostgresDB(BaseDB):
         except Exception as e:
             logger.error(f"Database connection test failed: {e}")
             raise
+
+
+T = TypeVar('T')
+
+class QueryBuilder: 
+    def __init__(self):
+        self._query: Optional[str] = None
+        self._params: dict = {}
+        self._session: Optional[AsyncSession] = None
+        self._result_mapper: Callable[[Result], Any] = lambda r: r  # Default to returning raw result
+
+    def session(self, session: AsyncSession) -> "QueryBuilder":
+        """Sets the database session."""
+        self._session = session
+        return self
+
+    def query(self, query: str) -> "QueryBuilder":
+        """Sets the SQL query."""
+        self._query = query
+        return self
+
+    def params(self, params) -> "QueryBuilder":
+        """Sets the query parameters."""
+        self._params = params
+        return self
+
+    def result_mapper(self, result_mapper: Callable[[Result], T]) -> "QueryBuilder":
+        """Sets a result mapper function."""
+        self._result_mapper = result_mapper
+        return self
+    
+    async def execute_write(self)->bool:
+        try:
+            async with self._session as s:
+                await s.execute(text(self._query), self._params)
+                await s.commit()
+        except Exception as e:
+            logger.error(f"Failed Write Query: {self._query} With Error: {str(e)}")
+            raise Exception(f"Failed Write Query: {str(e)} ")
+
+    async def execute_read(self)->Optional[T]:
+        try:
+            session: AsyncSession = self._session
+            async with session as s:
+                result = await s.execute(self._query, self._params)
+                return self._result_mapper(result)
+        except Exception as e:
+            logger.error(f"Failed Execute Query: {self._query} With Error: {str(e)}")            
+            raise Exception(f"Failed to Execute Query: {str(e)} ")
