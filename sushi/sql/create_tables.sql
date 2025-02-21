@@ -19,3 +19,17 @@ CREATE TABLE members (
         REFERENCES organizations(organization_id)
         ON DELETE CASCADE           
 );
+
+CREATE TABLE ad_platforms (
+    id SERIAL PRIMARY KEY,
+    organization_id INT REFERENCES organizations(id) ON DELETE CASCADE,
+    ad_platform_name VARCHAR(255) NOT NULL,
+    access_token TEXT NOT NULL,
+    refresh_token TEXT NOT NULL,
+    access_token_expiry TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_ad_platforms_organization_id 
+ON ad_platforms (organization_id);

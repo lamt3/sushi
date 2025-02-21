@@ -78,8 +78,4 @@ class HomeHandler:
             #     "name": "my_org"
             # }
             "campaigns":[],
-            "organization": {
-                "organization_id":1, 
-                "name": "my_org"
-            }
         }

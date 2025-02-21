@@ -4,6 +4,9 @@ class MemberDTO:
     first_name: str
     last_name: str
     member_type: str
+    organization_id: int
+    organization_name: str
+
 
     def __init__(self, email, first_name, last_name, member_type):
         self.email=email
@@ -17,8 +20,9 @@ class MemberDTO:
             "email": self.email,
             "first_name": self.first_name,
             "last_name": self.last_name,
-            "member_type": self.member_type
-            # Add other attributes
+            "member_type": self.member_type,
+            "organization_id": self.organization_id,
+            "organization_name": self.organization_name
         }
 
     @staticmethod

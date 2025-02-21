@@ -1,34 +1,27 @@
 import requests
 import datetime
 from abc import ABC, abstractmethod
-
+from tuna.dtos.ad_dto import AdConnectionDTO
 from tuna.config import Config
 
-class AdToken:
-    access_token: str
-    expires_at: datetime
-
-class AdOAuthService(ABC):
+class AdOAuthClient(ABC):
     @abstractmethod
     def get_auth_url(self, callback_url)->str:
         pass
 
     @abstractmethod
-    async def exchange_code_for_token(self)->AdToken:
+    async def exchange_code_for_token(self)->AdConnectionDTO:
         pass
-
-
-def get_oauth_service(ad_type: str)->AdOAuthService:
-    if ad_type == "fb":
-        return FacebookOAuthService()
     
-    return None
+    def get_client(ad_type: str)->"AdOAuthClient":
+        if ad_type == "fb":
+            return FacebookOAuthClient()
+    
+        return None
 
-
-class FacebookOAuthService(AdOAuthService):
+class FacebookOAuthClient(AdOAuthClient):
     AUTH_URL = "https://www.facebook.com/v18.0/dialog/oauth?"
     TOKEN_URL = "https://graph.facebook.com/v18.0/oauth/access_token"
-    REFRESH_TOKEN_URL = "https://graph.facebook.com/oauth/access_token"
     REDIRECT_URI = Config.FB_REDIRECT_URI
     CLIENT_ID = Config.FB_CLIENT_ID
     CLIENT_SECRET = Config.FB_CLIENT_SECRET
@@ -45,7 +38,7 @@ class FacebookOAuthService(AdOAuthService):
         url = requests.Request("GET", self.AUTH_URL, params=params).prepare().url
         return url
 
-    async def exchange_code_for_token(self, code: str)->AdToken:
+    async def exchange_code_for_token(self, code: str)->AdConnectionDTO:
         """Exchange authorization code for access token"""
         data = {
             "client_id": Config.FB_CLIENT_ID,
@@ -58,44 +51,33 @@ class FacebookOAuthService(AdOAuthService):
 
         if "access_token" not in response_data:
             raise Exception("Error fetching access token")
+        
+        short_lived_access_token = response_data["access_token"]
 
-        access_token = response_data["access_token"]
-        expires_in = response_data.get("expires_in", 3600)
+        long_lived_params = {
+            "grant_type": "fb_exchange_token",
+            "client_id": Config.FB_CLIENT_ID,
+            "client_secret": Config.FB_CLIENT_SECRET,
+            "fb_exchange_token": short_lived_access_token
+        }
+        long_lived_response = requests.get(self.TOKEN_URL, params=long_lived_params)
+        long_lived_data = long_lived_response.json()
+
+        if "access_token" not in long_lived_data:
+            return Exception("Error fetching access token")
+        
+        access_token = long_lived_data["access_token"]
+        expires_in = long_lived_data.get("expires_in")
         expires_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_in)
-
-        return {"access_token": access_token, "expires_at": expires_at}
-
-    async def refresh_token(self):
-        """Refresh tokens that are near expiry"""
-        # db = SessionLocal()
-        # now = datetime.datetime.utcnow()
-        # tokens_to_refresh = db.query(FacebookToken).filter(
-        #     FacebookToken.expires_at <= now + datetime.timedelta(minutes=5)
-        # ).all()
-
-        refreshed_tokens = []
-        # for token_entry in []:#tokens_to_refresh:
-        #     data = {
-        #         "grant_type": "fb_exchange_token",
-        #         "client_id": "settings.fb_client_id",
-        #         "client_secret": "settings.fb_client_secret",
-        #         "fb_exchange_token": token_entry.access_token,
-        #     }
-        #     response = requests.get(self.REFRESH_TOKEN_URL, params=data)
-        #     response_data = response.json()
-
-        #     if "access_token" in response_data:
-        #         token_entry.access_token = response_data["access_token"]
-        #         expires_in = response_data.get("expires_in", 3600)
-        #         token_entry.expires_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_in)
-        #         db.commit()
-        #         refreshed_tokens.append(token_entry.access_token)
-
-        # db.close()
-        return refreshed_tokens
-
-
-
+        
+        #note: fb doesn't provide refresh_tokens; access_tokens expires in 60 days. Can request for system user token instead in future, but more effort for user.
+        return AdConnectionDTO(
+            ad_platform_name="fb",
+            access_token=access_token,
+            access_token_expiry=expires_at,
+            refresh_token="" 
+        )
+  
 
 
 
