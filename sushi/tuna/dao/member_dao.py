@@ -62,7 +62,6 @@ class MemberDAO:
                     row = result.mappings().first()
                     if row is None:
                         raise Exception("Failed to insert or find member")
-                    
                     await s.commit()
                     return {
                         "member_id": row["member_id"],
@@ -70,10 +69,8 @@ class MemberDAO:
                         "organization_name": row["organization_name"]
                     }  
         except Exception as e:
-            await session.rollback() 
             raise Exception(f"Failed to insert or find member: {str(e)} ")
-        finally:
-            await session.close()
+        
 
     async def insert_organization(self, org_name:str)->int:
 

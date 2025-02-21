@@ -6,7 +6,7 @@ class AdService:
         self.ad_dao = ad_dao
     
     def get_auth_url(self, ad_platform:str, callback_url:str)->str:
-        client: AdOAuthClient = AdOAuthClient.get_client("avb")
+        client: AdOAuthClient = AdOAuthClient.get_client(ad_platform)
         if client == None:
             raise Exception(detail=f"ad_platform: {ad_platform} not found")
 

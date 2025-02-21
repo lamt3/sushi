@@ -114,14 +114,9 @@ class QueryBuilder:
                 async with s.begin():
                     await session.execute(text(self._query), self._params)
                     await s.commit()
-                return True
         except Exception as e:
-            await session.rollback() 
             logger.error(f"Failed Write Query: {self._query} With Error: {str(e)}")
             raise Exception(f"Failed Write Query: {str(e)} ")
-        finally:
-            print("closing connection...")
-            await session.close()
 
     async def execute_read(self)->Optional[T]:
         try:
@@ -130,7 +125,5 @@ class QueryBuilder:
                 result = await s.execute(self._query, self._params)
                 return self._result_mapper(result)
         except Exception as e:
-            await session.rollback() 
-            raise Exception(f"Failed to insert or find member: {str(e)} ")
-        finally:
-            await session.close()
+            logger.error(f"Failed Execute Query: {self._query} With Error: {str(e)}")            
+            raise Exception(f"Failed to Execute Query: {str(e)} ")
