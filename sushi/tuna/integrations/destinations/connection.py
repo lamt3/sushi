@@ -79,7 +79,77 @@ class FacebookOAuthClient(AdOAuthClient):
         )
   
 
+class TikTokOAuthClient(AdOAuthClient):
+    AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/"
+    TOKEN_URL = "https://business-api.tiktok.com/open_api/v2/oauth/token/"
+    REFRESH_URL = "https://business-api.tiktok.com/open_api/v2/oauth/refresh_token/"
 
+    def get_auth_url(self, callback_url)->str:
+
+        scopes = [
+            "tiktok_business_ads.manage",  # Manage ads
+            "tiktok_business_ads.read",    # Read ad accounts, campaigns, and ads
+            "tiktok_business_creative.read",  # View creative assets
+            "tiktok_business_creative.manage",  # Upload/manage creatives
+            "tiktok_business_audience.read",  # Read audience data
+            "tiktok_business_audience.manage",  # Create/manage custom audiences
+            "tiktok_business_insights.read"  # Fetch analytics data
+        ]
+        
+        params = {
+            "client_key": Config.TIKTOK_CLIENT_ID,
+            "response_type": "code",
+            "scope": " ".join(scopes),  # Space-separated list of scopes
+            "redirect_uri": Config.TIKTOK_REDIRECT_URI,
+            "state": callback_url,
+        }
+    
+        return requests.Request("GET", self.AUTH_URL, params=params).prepare().url 
+
+    async def exchange_code_for_token(self, code: str)->AdConnectionDTO:
+        """Exchange authorization code for access token"""
+        payload = {
+            "client_key": Config.TIKTOK_CLIENT_ID,
+            "client_secret": Config.TIKTOK_CLIENT_SECRET,
+            "code": code,
+            "grant_type": "authorization_code",
+            "redirect_uri": Config.TIKTOK_REDIRECT_URI
+        }
+        response = requests.post(self.TOKEN_URL, json=payload)
+        data = response.json()
+    
+        if "error_code" in data and data["error_code"] != 0:
+            return {"error": data["message"]}
+
+        return {
+            "access_token": data["data"]["access_token"],
+            "expires_in": data["data"]["expires_in"],
+            "refresh_token": data["data"]["refresh_token"],
+            "refresh_expires_in": data["data"]["refresh_expires_in"]
+        }
+    
+    async def refresh_access_token(self, refresh_token):
+        payload = {
+            "client_key": Config.TIKTOK_CLIENT_ID,
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token
+        }
+        
+        response = requests.post(self.REFRESH_URL, json=payload)
+        data = response.json()
+        
+        if "error_code" in data and data["error_code"] != 0:
+            return {"error": data["message"]}
+
+        return {
+            "access_token": data["data"]["access_token"],
+            "expires_in": data["data"]["expires_in"],  # 1 day
+            "refresh_token": data["data"]["refresh_token"],
+            "refresh_expires_in": data["data"]["refresh_expires_in"]  # 30 days
+        }
+
+
+  
 
 
 

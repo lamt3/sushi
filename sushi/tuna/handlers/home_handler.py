@@ -40,7 +40,7 @@ class HomeHandler:
                 httponly=True,
                 secure=False,
                 samesite="lax",
-                max_age=15767999,
+                max_age=15767999, #6 months
                 path="/"
             )
             

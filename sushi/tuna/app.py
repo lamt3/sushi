@@ -64,10 +64,6 @@ def initialize():
             logger.error(f"Failed to initialize database: {e}")
             raise
 
-
-
-   
-
     routes = APIRouter(prefix="/api/v1")
     routes.add_api_route("/health", home_handler.health, methods=["GET"])
     routes.add_api_route("/login", home_handler.login_member, methods=["POST"])

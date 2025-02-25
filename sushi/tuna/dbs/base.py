@@ -85,8 +85,7 @@ class QueryBuilder:
         self._query: Optional[str] = None
         self._params: dict = {}
         self._session: Optional[AsyncSession] = None
-        self._result_mapper: Callable[[Result], Any] = lambda r: r  # Default to returning raw result
-
+        
     def session(self, session: AsyncSession) -> "QueryBuilder":
         """Sets the database session."""
         self._session = session
@@ -101,11 +100,6 @@ class QueryBuilder:
         """Sets the query parameters."""
         self._params = params
         return self
-
-    def result_mapper(self, result_mapper: Callable[[Result], T]) -> "QueryBuilder":
-        """Sets a result mapper function."""
-        self._result_mapper = result_mapper
-        return self
     
     async def execute_write(self)->bool:
         try:
@@ -116,12 +110,12 @@ class QueryBuilder:
             logger.error(f"Failed Write Query: {self._query} With Error: {str(e)}")
             raise Exception(f"Failed Write Query: {str(e)} ")
 
-    async def execute_read(self)->Optional[T]:
+    async def execute_read(self, result_mapper: Callable[[Result], T])->Optional[T]:
         try:
             session: AsyncSession = self._session
             async with session as s:
                 result = await s.execute(self._query, self._params)
-                return self._result_mapper(result)
+                return result_mapper(result)
         except Exception as e:
             logger.error(f"Failed Execute Query: {self._query} With Error: {str(e)}")            
             raise Exception(f"Failed to Execute Query: {str(e)} ")

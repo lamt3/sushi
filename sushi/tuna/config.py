@@ -47,6 +47,10 @@ class Config:
     FB_CLIENT_ID = os.getenv("FB_CLIENT_ID")
     FB_CLIENT_SECRET = os.getenv("FB_CLIENT_SECRET")
 
+    TIKTOK_REDIRECT_URI= os.getenv("TIKTOK_REDIRECT_URI")
+    TIKTOK_CLIENT_ID = os.getenv("TIKTOK_CLIENT_ID")
+    TIKTOK_CLIENT_SECRET = os.getenv("TIKTOK_CLIENT_SECRET")
+
     #jwt configs
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key")
     JWT_ALGORITHM = "HS256"
