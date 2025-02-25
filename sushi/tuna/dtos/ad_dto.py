@@ -2,41 +2,25 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 
-class AdConnectionDTO:
+class AdConnectionDTO(BaseModel):
     ad_platform_name: str
     access_token: str
     access_token_expiry: datetime
     refresh_token: str
 
-    def __init__(self, ad_platform_name: str, access_token: str, access_token_expiry: datetime, refresh_token: str):
-        self.ad_platform_name = ad_platform_name
-        self.access_token = access_token
-        self.access_token_expiry = access_token_expiry
-        self.refresh_token = refresh_token
-
-    def to_json(self):
-        return {
-            "access_token": self.access_token, 
-            "access_token_expiry": self.access_token_expiry,
-            "refresh_token": self.refresh_token,
-            "ad_platform_name": self.ad_platform_name
-        }
-
 
 # Ad Account Model
 class AdAccount(BaseModel):
-    id: int
+    organization_id: int = None
     platform: str
     account_id: str
     name: str
     currency: str
-    timezone: Optional[str]
-    spend_cap: Optional[float]
-    created_at: datetime
-    campaigns: List["Campaign"]
-
-
-    
+    timezone: Optional[str] = None
+    spend_cap: Optional[float] = None
+    balance: Optional[float] = None
+    created_at: datetime = datetime.utcnow()
+    campaigns: List["Campaign"] = None    
 
 # Campaign Model
 class Campaign(BaseModel):

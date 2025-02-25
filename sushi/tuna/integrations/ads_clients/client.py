@@ -2,18 +2,32 @@ import requests
 
 from abc import ABC, abstractmethod
 
+from tuna.dtos.ad_dto import AdAccount
+from typing import List
+
 class AdClient(ABC):
     @abstractmethod
-    def get_ad_accounts(self, access_token:str):
+    def get_ad_accounts(self, access_token:str)->List[AdAccount]:
         pass
 
+    @staticmethod
+    def get_ad_client(ad_platform: str)->"AdClient":
+        if ad_platform == "fb":
+            return FBAdClient()
+
 class FBAdClient(AdClient):
-    FB_API_URL = "https://graph.facebook.com/v18.0/me/adaccounts"
-    def get_ad_accounts(self, access_token:str):
+    
+    def get_ad_accounts(self, access_token:str)->List[AdAccount]:
          """Fetch the list of ad accounts for the authenticated user."""
+         FB_AD_ACCOUNTS_URL = "https://graph.facebook.com/v18.0/me/adaccounts"
          headers = {"Authorization": f"Bearer {access_token}"}
-         response = requests.get(self.FB_API_URL, headers=headers)
+         params = {
+            "fields": "id,name,account_id,currency,status,daily_spend_limit,spend_cap,balance,amount_spent", 
+        }
+         response = requests.get(FB_AD_ACCOUNTS_URL, params, headers=headers)
          data = response.json()
+
+         print(data)
 
          if "error" in data:
             return {"error": data["error"]["message"]}
@@ -36,9 +50,21 @@ class FBAdClient(AdClient):
 #     "type": "OAuthException",
 #     "code": 190
 #   }
-# }
-
-         return data.get("data", [])
+# }     
+         ad_accounts = []
+         for d in data.get("data", []):
+             account_id = d["id"]
+             name = d.get("name", account_id)
+             currency = d.get("currency", "")
+             ad_account = AdAccount(
+                 platform="fb",
+                 account_id=account_id,
+                 name=name,
+                 currency=currency
+             )
+             ad_accounts.append(ad_account)
+             
+         return ad_accounts
 
 
 

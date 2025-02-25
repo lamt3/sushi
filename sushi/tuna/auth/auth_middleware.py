@@ -30,7 +30,7 @@ async def auth_middleware(request: Request, call_next):
         try:
             # Verify the JWT token
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            request.state.user = payload
+            request.state.member = payload
         except JWTError as e:
             logger.error(f"Auth Middleware - Invalid Token: {e}")
             return JSONResponse(

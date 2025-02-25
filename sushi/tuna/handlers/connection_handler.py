@@ -21,7 +21,7 @@ class ConnectionHandler:
     
     async def get_oauth_token(self, request: Request, ad_platform:str, code: str, state: str):
         try:             
-            member = request.state.user
+            member = request.state.member
             await self.ads.add_oauth_connection(organization_id=member["organization_id"], ad_platform=ad_platform, code=code)
             return RedirectResponse(url=state)
         except Exception as e:

@@ -7,7 +7,7 @@ from tuna.services.home_service import HomeService
 import requests
 from pydantic import BaseModel
 from fastapi import Response
-from fastapi import Cookie
+
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class HomeHandler:
         return await self.hs.get_home()
     
     async def verify_auth(self, request: Request):
-        return request.state.user
+        return request.state.member
         # return {"status": "ok"}
     
     async def login_member(self, request: GoogleAuthTokenRequest, response:Response):
@@ -61,7 +61,7 @@ class HomeHandler:
     async def get_dashboard(self, request: Request):
         print(request.cookies.get("token"))
         print()
-        print(request.state.user)
+        print(request.state.member)
         return {
             # "campaigns" : [ {
             # "id": 1,

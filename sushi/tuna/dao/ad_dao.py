@@ -1,9 +1,9 @@
-from tuna.dtos.ad_dto import AdConnectionDTO
+from tuna.dtos.ad_dto import AdConnectionDTO, AdAccount
 from tuna.dtos.member_dto import MemberDTO
 from tuna.dbs.base import QueryBuilder
 from sqlalchemy import Result, text, Row
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import TypeVar, Optional, Callable, Any
+from typing import TypeVar, Optional, Callable, Any, List
 
 
 class AdDAO:
@@ -16,7 +16,7 @@ class AdDAO:
         select access_token 
         from ad_platforms 
         where organization_id = :organization_id 
-        and ad_platform_name = :ad_platform
+        and ad_platform_name = :ad_platform_name
         """
 
         params = {
@@ -57,8 +57,24 @@ class AdDAO:
             refresh_token = EXCLUDED.refresh_token;
         """
 
-        params = adc.to_json()
+        params = adc.model_dump()
         params["organization_id"] = organization_id
+        
+        session: AsyncSession = self.db()
+        query_builder = QueryBuilder()
+        await (query_builder
+            .session(session)
+            .query(query)
+            .params(params)
+            .execute_write())
+        
+    async def insert_ad_accounts(self, ad_accounts: List[AdAccount]):
+        query = """
+        INSERT INTO ad_accounts (platform, account_id, name, currency, timezone, spend_cap, organization_id)
+        VALUES (:platform, :account_id, :name, :currency, :timezone, :spend_cap, :organization_id)
+        ON CONFLICT (account_id, organization_id) DO NOTHING
+        """
+        params = [account.model_dump() for account in ad_accounts]
         
         session: AsyncSession = self.db()
         query_builder = QueryBuilder()

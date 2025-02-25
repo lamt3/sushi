@@ -114,7 +114,7 @@ class QueryBuilder:
         try:
             session: AsyncSession = self._session
             async with session as s:
-                result = await s.execute(self._query, self._params)
+                result = await s.execute(text(self._query), self._params)
                 return result_mapper(result)
         except Exception as e:
             logger.error(f"Failed Execute Query: {self._query} With Error: {str(e)}")            
