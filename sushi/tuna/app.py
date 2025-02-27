@@ -28,7 +28,7 @@ def initialize():
         "https://figsprout.netlify.app"
     ]
 
-    # app.middleware("http")(auth_middleware)
+    app.middleware("http")(auth_middleware)
 
     app.add_middleware(
         CORSMiddleware,
