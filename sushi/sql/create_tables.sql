@@ -37,3 +37,19 @@ UNIQUE (organization_id, ad_platform_name);
 
 CREATE INDEX idx_ad_platforms_organization_id 
 ON ad_platforms (organization_id);
+
+
+CREATE TABLE ad_accounts (
+    account_id VARCHAR(100) PRIMARY KEY,  -- Set account_id as the primary key
+    platform VARCHAR(50) NOT NULL,        -- Facebook, Google, LinkedIn, etc.
+    name VARCHAR(255) NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    timezone VARCHAR(50),
+    spend_cap NUMERIC(12,2),              -- PostgreSQL uses NUMERIC instead of DECIMAL
+    created_at TIMESTAMP DEFAULT NOW(),
+    organization_id INT NOT NULL REFERENCES organizations(organization_id) ON DELETE CASCADE,  -- foreign key
+    CONSTRAINT unique_account_per_org UNIQUE (account_id, organization_id) 
+);
+
+-- Add an index on organization_id for faster lookups
+CREATE INDEX idx_organization_id ON ad_accounts (organization_id);

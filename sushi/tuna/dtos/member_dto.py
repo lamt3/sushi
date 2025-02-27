@@ -35,3 +35,19 @@ class MemberDTO:
         )
 
 
+
+class AdAccount:
+    ad_platform: str
+    ad_account: str
+    access_token: str
+
+class AdCampaign: 
+    campaign_id: str
+    
+
+
+class OrgProfileDTO:
+    organzation_id: int
+    organization_name: str
+
+

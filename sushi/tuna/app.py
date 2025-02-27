@@ -1,5 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from tuna.handlers.ad_handler import AdHandler
 from tuna.services.ad_service import AdService
 from tuna.dao.ad_dao import AdDAO
 from tuna.auth.auth_middleware import auth_middleware
@@ -27,7 +28,7 @@ def initialize():
         "https://figsprout.netlify.app"
     ]
 
-    app.middleware("http")(auth_middleware)
+    # app.middleware("http")(auth_middleware)
 
     app.add_middleware(
         CORSMiddleware,
@@ -46,8 +47,10 @@ def initialize():
     home_handler = HomeHandler(home_service)
 
     ad_dao = AdDAO(db=session)
-    ad_service = AdService(ad_dao=ad_dao)
+    ad_service = AdService(ad_dao)
     connection_handler = ConnectionHandler(ad_service)
+
+    ad_handler = AdHandler(ad_service)
 
     @app.on_event("shutdown")
     async def shutdown():
@@ -64,10 +67,6 @@ def initialize():
             logger.error(f"Failed to initialize database: {e}")
             raise
 
-
-
-   
-
     routes = APIRouter(prefix="/api/v1")
     routes.add_api_route("/health", home_handler.health, methods=["GET"])
     routes.add_api_route("/login", home_handler.login_member, methods=["POST"])
@@ -77,6 +76,9 @@ def initialize():
     #Connection Routes
     routes.add_api_route("/destination/oauth/{ad_platform}", connection_handler.get_auth_url, methods=["GET"])
     routes.add_api_route("/destination/oauth/{ad_platform}/callback", connection_handler.get_oauth_token, methods=["GET"])
+
+    routes.add_api_route("/ad/{ad_platform}/accounts", ad_handler.get_ad_accounts, methods=["GET"])
+    routes.add_api_route("/ad/{ad_platform}/accounts", ad_handler.add_ad_accounts, methods=["POST"])
 
     app.include_router(routes)
     return app
