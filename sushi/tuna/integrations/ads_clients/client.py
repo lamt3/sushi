@@ -3,7 +3,7 @@ import requests
 from abc import ABC, abstractmethod
 
 from tuna.dtos.ad_dto import AdAccount
-from typing import List
+from typing import List, Optional
 
 class AdClient(ABC):
     @abstractmethod
@@ -11,9 +11,11 @@ class AdClient(ABC):
         pass
 
     @staticmethod
-    def get_ad_client(ad_platform: str)->"AdClient":
+    def get_ad_client(ad_platform: str)->Optional["AdClient"]:
         if ad_platform == "fb":
             return FBAdClient()
+        
+        return None
 
 class FBAdClient(AdClient):
     

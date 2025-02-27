@@ -28,7 +28,7 @@ def initialize():
         "https://figsprout.netlify.app"
     ]
 
-    app.middleware("http")(auth_middleware)
+    # app.middleware("http")(auth_middleware)
 
     app.add_middleware(
         CORSMiddleware,
@@ -47,7 +47,7 @@ def initialize():
     home_handler = HomeHandler(home_service)
 
     ad_dao = AdDAO(db=session)
-    ad_service = AdService(ad_dao=ad_dao)
+    ad_service = AdService(ad_dao)
     connection_handler = ConnectionHandler(ad_service)
 
     ad_handler = AdHandler(ad_service)

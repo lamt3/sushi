@@ -106,14 +106,14 @@ class QueryBuilder:
             async with self._session as s:
                 await s.execute(text(self._query), self._params)
                 await s.commit()
+            return True
         except Exception as e:
             logger.error(f"Failed Write Query: {self._query} With Error: {str(e)}")
             raise Exception(f"Failed Write Query: {str(e)} ")
 
     async def execute_read(self, result_mapper: Callable[[Result], T])->Optional[T]:
         try:
-            session: AsyncSession = self._session
-            async with session as s:
+            async with self._session as s:
                 result = await s.execute(text(self._query), self._params)
                 return result_mapper(result)
         except Exception as e:

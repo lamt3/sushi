@@ -11,7 +11,7 @@ class AdDAO:
         self.db = db
 
     
-    async def get_access_token(self, organization_id: str, ad_platform: str):
+    async def get_access_token(self, organization_id: str, ad_platform: str)->Optional[str]:
         query = """
         select access_token 
         from ad_platforms 
@@ -31,7 +31,7 @@ class AdDAO:
                                 .execute_read(lambda r : self._map_access_token(r)))
         return access_token
     
-    def _map_access_token(self, r: Result):
+    def _map_access_token(self, r: Result)->str:
         row = r.mappings().first()
         return row["access_token"]
     
@@ -62,11 +62,10 @@ class AdDAO:
         
         session: AsyncSession = self.db()
         query_builder = QueryBuilder()
-        await (query_builder
-            .session(session)
-            .query(query)
-            .params(params)
-            .execute_write())
+        await (query_builder.session(session)
+                            .query(query)
+                            .params(params)
+                            .execute_write())
         
     async def insert_ad_accounts(self, ad_accounts: List[AdAccount]):
         query = """
@@ -78,9 +77,8 @@ class AdDAO:
         
         session: AsyncSession = self.db()
         query_builder = QueryBuilder()
-        await (query_builder
-            .session(session)
-            .query(query)
-            .params(params)
-            .execute_write())
+        await (query_builder.session(session)
+                            .query(query)
+                            .params(params)
+                            .execute_write())
     

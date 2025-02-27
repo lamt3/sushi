@@ -32,6 +32,9 @@ class AdService:
             raise Exception(detail=f"ad_platform: {ad_platform} not found")
         
         access_token = await self.ad_dao.get_access_token(organization_id, ad_platform)
+        if access_token == None or access_token == "":
+            raise Exception("No FB Access Token")
+        
         return ad_client.get_ad_accounts(access_token)
 
     async def add_ad_accounts(self, ad_accounts: List[AdAccount]):

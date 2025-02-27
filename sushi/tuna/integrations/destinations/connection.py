@@ -3,6 +3,7 @@ import datetime
 from abc import ABC, abstractmethod
 from tuna.dtos.ad_dto import AdConnectionDTO
 from tuna.config import Config
+from typing import Optional
 
 class AdOAuthClient(ABC):
     @abstractmethod
@@ -13,7 +14,7 @@ class AdOAuthClient(ABC):
     async def exchange_code_for_token(self)->AdConnectionDTO:
         pass
     
-    def get_client(ad_type: str)->"AdOAuthClient":
+    def get_client(ad_type: str)->Optional["AdOAuthClient"]:
         if ad_type == "fb":
             return FacebookOAuthClient()
     

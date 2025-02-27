@@ -35,7 +35,7 @@ async def auth_middleware(request: Request, call_next):
             logger.error(f"Auth Middleware - Invalid Token: {e}")
             return JSONResponse(
                 status_code=401,
-                content={"detail": "Authetntication Failed. Please Re-Login"}
+                content={"detail": "Authetication Failed. Please Re-Login"}
             )
 
         # Continue processing the request
