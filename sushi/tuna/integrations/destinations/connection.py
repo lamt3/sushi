@@ -1,7 +1,7 @@
 import requests
 import datetime
 from abc import ABC, abstractmethod
-from tuna.dtos.ad_dto import AdConnectionDTO
+from tuna.dtos.ad_dto import AdAccessToken
 from tuna.config import Config
 from typing import Optional
 
@@ -11,7 +11,7 @@ class AdOAuthClient(ABC):
         pass
 
     @abstractmethod
-    async def exchange_code_for_token(self)->AdConnectionDTO:
+    async def exchange_code_for_token(self)->AdAccessToken:
         pass
     
     def get_client(ad_type: str)->Optional["AdOAuthClient"]:
@@ -39,7 +39,7 @@ class FacebookOAuthClient(AdOAuthClient):
         url = requests.Request("GET", self.AUTH_URL, params=params).prepare().url
         return url
 
-    async def exchange_code_for_token(self, code: str)->AdConnectionDTO:
+    async def exchange_code_for_token(self, code: str)->AdAccessToken:
         """Exchange authorization code for access token"""
         data = {
             "client_id": Config.FB_CLIENT_ID,
@@ -72,7 +72,7 @@ class FacebookOAuthClient(AdOAuthClient):
         expires_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_in)
         
         #note: fb doesn't provide refresh_tokens; access_tokens expires in 60 days. Can request for system user token instead in future, but more effort for user.
-        return AdConnectionDTO(
+        return AdAccessToken(
             ad_platform_name="fb",
             access_token=access_token,
             access_token_expiry=expires_at,
@@ -107,7 +107,7 @@ class TikTokOAuthClient(AdOAuthClient):
     
         return requests.Request("GET", self.AUTH_URL, params=params).prepare().url 
 
-    async def exchange_code_for_token(self, code: str)->AdConnectionDTO:
+    async def exchange_code_for_token(self, code: str)->AdAccessToken:
         """Exchange authorization code for access token"""
         payload = {
             "client_key": Config.TIKTOK_CLIENT_ID,

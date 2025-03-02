@@ -1,3 +1,8 @@
+from typing import List, Dict, Any, Optional
+from pydantic import BaseModel
+from enum import Enum
+
+
 class MemberDTO:
     member_id: int
     email: str
@@ -34,20 +39,15 @@ class MemberDTO:
             member_type = 'admin'
         )
 
-
-
-class AdAccount:
-    ad_platform: str
-    ad_account: str
-    access_token: str
-
-class AdCampaign: 
-    campaign_id: str
     
 
-
-class OrgProfileDTO:
+class Organization(BaseModel):
     organzation_id: int
-    organization_name: str
+    name: str
+    industry: str
+    website: str
+    city: str
+    country: str
+
 
 

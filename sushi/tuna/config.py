@@ -55,3 +55,8 @@ class Config:
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key")
     JWT_ALGORITHM = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES = 262800
+
+    #open ai configs
+    OPEN_AI_KEY = os.getenv("OPEN_AI_KEY", "")
+
+    GOOGLE_APPLICATION_CREDENTIALS = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]

@@ -6,6 +6,11 @@ from tuna.dtos.member_dto import MemberDTO
 from tuna.dtos.ad_dto import AdAccount
 from pydantic import BaseModel
 
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.responses import JSONResponse
+from PIL import Image
+
+
 logger = logging.getLogger(__name__)
 
 class AdAccountRequest(BaseModel):
@@ -33,3 +38,7 @@ class AdHandler:
         except Exception as e:
             logging.error(f"AdHandler.get_ad_accounts() error: {str(e)}")
             raise HTTPException(status_code=500, detail="Error Adding Ad Accounts. Please Try Again.")
+        
+
+    async def generate_ad_creatives(self, file: UploadFile):
+        print('hi')

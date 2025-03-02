@@ -1,13 +1,15 @@
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
+from enum import Enum
 
-class AdConnectionDTO(BaseModel):
+class AdAccessToken(BaseModel):
     ad_platform_name: str
     access_token: str
     access_token_expiry: datetime
     refresh_token: str
 
+#Ad Account -> Campaigns -> Ad Set -> Ads
 
 # Ad Account Model
 class AdAccount(BaseModel):
@@ -71,5 +73,65 @@ class Ad(BaseModel):
     media_url: Optional[str]
     created_at: datetime
 
-    def to_json(self) -> Dict[str, Any]:
-        return self.dict()
+
+class Audience(BaseModel):
+    AUDIENCE: str
+
+
+
+
+
+
+class AdPlatform(Enum):
+    FB = "FB"
+    INSTAGRAM = "INSTAGRAM"
+    TIKTOK = "TIKTOK"
+    LINKEDIN = "LINKEDIN"
+    X = "X"
+    REDDIT = "REDDIT"
+
+class TemplateType(Enum):
+    CUSTOM = "CUSTOM"
+    
+    #awareness
+    NEW_LAUNCH = "NEW_LAUNCH"
+    SEASONAL_BUZZ = "SEASONAL_BUZZ"
+    TRENDS = "TRENDS"
+
+    #engagement
+    PROMOTE_ITEM = "PROMOTE_ITEM"
+    COMPARISON = "COMPARISON"
+    RESOURCE = "RESOURCE"
+
+    #conversion
+    FLASH_SALE = "FLASH_SALE"
+    FREE_TRIAL = "FREE_TRIAL"
+    CART_ABANDON = "CART_ABANDON"
+    LIMITED_STOCK = "LIMITED_STOCK" 
+    REFERAL = "REFERAL" #refer a friend; get $X 
+
+
+class Objective(Enum):
+    AWARENESS = "AWARENESS"
+    ENGAGEMENT = "ENGAGEMENT"
+    CONVERSION = "CONVERSION"
+
+class CampaignTemplate(BaseModel):
+    campaign_template_id: int
+    objective: Objective
+    global_budget: int
+    global_budget_currency: str
+    industry: str
+    status: str
+
+class AdTemplate(BaseModel):
+    campaign_template_id: int
+    ad_template_id: int
+    ad_platform: str
+    audience: str
+
+# class PromoteItemAd(BaseModel):
+
+
+
+

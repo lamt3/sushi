@@ -1,4 +1,4 @@
-from tuna.dtos.ad_dto import AdConnectionDTO, AdAccount
+from tuna.dtos.ad_dto import AdAccessToken, AdAccount
 from tuna.dtos.member_dto import MemberDTO
 from tuna.dbs.base import QueryBuilder
 from sqlalchemy import Result, text, Row
@@ -9,7 +9,6 @@ from typing import TypeVar, Optional, Callable, Any, List
 class AdDAO:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
-
     
     async def get_access_token(self, organization_id: str, ad_platform: str)->Optional[str]:
         query = """
@@ -35,7 +34,7 @@ class AdDAO:
         row = r.mappings().first()
         return row["access_token"]
     
-    async def insert_ad_platform(self, organization_id: int, adc: AdConnectionDTO):
+    async def insert_ad_platform(self, organization_id: int, adc: AdAccessToken):
         query = """
         INSERT INTO ad_platforms (
         organization_id,
