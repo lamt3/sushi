@@ -1,5 +1,7 @@
+from openai import OpenAI
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from tuna.handlers.pixel_handler import PixelHandler
 from tuna.handlers.ad_handler import AdHandler
 from tuna.services.ad_service import AdService
 from tuna.dao.ad_dao import AdDAO
@@ -9,7 +11,7 @@ from tuna.handlers.connection_handler import ConnectionHandler
 from tuna.dao.member_dao import MemberDAO
 from tuna.handlers.home_handler import HomeHandler
 from tuna.services.home_service import HomeService
-from tuna.config import setup_logging
+from tuna.config import Config, setup_logging
 import logging
 
 
@@ -24,6 +26,11 @@ def initialize():
     logger.info("Initializing application...") 
 
     origins = [
+        "*",
+        "https://*.myshopify.com",       # All Shopify stores
+        "https://*.shopifypreview.com",  # Preview/development stores
+        "https://*.shopify.com",         # Shopify admin
+        "https://shopify.dev", 
         "http://localhost:3000", 
         "https://figsprout.netlify.app"
     ]
@@ -38,6 +45,8 @@ def initialize():
         allow_headers=["*"],  # Allow all headers
         expose_headers=["*"]
     )
+
+    ai_client = OpenAI(api_key=Config.OPEN_AI_KEY)
     
     pg_db = get_db("postgres")
     session = pg_db.create_db()
@@ -51,6 +60,8 @@ def initialize():
     connection_handler = ConnectionHandler(ad_service)
 
     ad_handler = AdHandler(ad_service)
+
+    pixel_handler = PixelHandler()
 
     @app.on_event("shutdown")
     async def shutdown():
