@@ -19,8 +19,8 @@ class UtmParams(BaseModel):
 class PixelEventData(BaseModel):
     event: str
     timestamp: str
-    shopDomain: str
-    utmParams: Optional[UtmParams] = None
+    # shopDomain: str
+    # utmParams: Optional[UtmParams] = None
     data: Dict[str, Any]
 
 class PixelHandler:
