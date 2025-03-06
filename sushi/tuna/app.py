@@ -92,6 +92,8 @@ def initialize():
     routes.add_api_route("/ad/{ad_platform}/accounts", ad_handler.get_ad_accounts, methods=["GET"])
     routes.add_api_route("/ad/{ad_platform}/accounts", ad_handler.add_ad_accounts, methods=["POST"])
 
+    routes.add_api_route("/pixel", pixel_handler.process_event, methods=["POST"])
+
     app.include_router(routes)
     return app
 
