@@ -36,17 +36,17 @@ class ConnectionHandler:
             # to do: redirect back to app w/ error param
             raise HTTPException(status_code=400, detail=str(e))
         
-    async def shopify_oauth(request: Request, shop: str, code: str, hmac_value: str = Query(alias="hmac")):
+    async def shopify_oauth(request: Request, shop: str, session: str):
         """Handle OAuth callback from Shopify"""
         
         try: 
             print("in shopifiy oauth...")
             # 1. Verify the HMAC signature
-            if not verify_hmac(request, Config.SHOPIFY_SECRET_KEY):
-                raise HTTPException(status_code=403, detail="Invalid HMAC signature")
+            # if not verify_hmac(request, Config.SHOPIFY_SECRET_KEY):
+            #     raise HTTPException(status_code=403, detail="Invalid HMAC signature")
             
             # 2. Exchange code for access token
-            access_token = await exchange_code_for_token(shop, code)
+            access_token = await exchange_code_for_token(shop, session)
             
             # 3. Auto-register the web pixel
             await create_web_pixel(shop, access_token)
@@ -62,14 +62,17 @@ class ConnectionHandler:
             raise HTTPException(status_code=403, detail="Shopify Login Failed. Please Try Again.")
 
    
-async def exchange_code_for_token(shop: str, code: str):
+async def exchange_code_for_token(shop: str, session_token: str):
     """Exchange authorization code for permanent access token"""
     
     token_url = f"https://{shop}/admin/oauth/access_token"
     payload = {
         "client_id": Config.SHOPIFY_CLIENT_ID,
         "client_secret": Config.SHOPIFY_SECRET_KEY,
-        "code": code
+        "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+        "subject_token": session_token,
+        "subject_token_type": "urn:ietf:params:oauth:token-type:id_token",
+        "requested_token_type": "urn:shopify:params:oauth:token-type:online-access-token"
     }
     
     response = requests.post(token_url, json=payload)
