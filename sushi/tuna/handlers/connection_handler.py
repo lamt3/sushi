@@ -101,7 +101,7 @@ class ConnectionHandler:
             nonce = secrets.token_hex(16)
             
             # Build redirect URL for authorization
-            redirect_uri = "https://sushi-api-951508746812.asia-southeast1.run.app/api/v1/shopify/oauth"
+            redirect_uri = "https://sushi-api-951508746812.asia-southeast1.run.app/api/v1/shopify/oauth/callback"
             scopes = "write_pixels,read_customer_events"
             
             auth_url = (
