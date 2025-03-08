@@ -26,9 +26,9 @@ class HomeHandler:
         member = request.state.member
         
         query_params = dict(request.query_params)
-        store = query_params.pop("store", None)
+        store = query_params.pop("shop", None)
         if store: 
-            self.hs.connect_shopify_store(member["organization_id"], store)
+            await self.hs.connect_shopify_store(member["organization_id"], store)
 
         return request.state.member
         # return {"status": "ok"}
