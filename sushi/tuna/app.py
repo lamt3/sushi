@@ -86,6 +86,8 @@ def initialize():
     routes.add_api_route("/dashboard", home_handler.get_dashboard, methods=["GET"])
 
     #Connection Routes
+    routes.add_api_route("/shopify/oauth", connection_handler.shopify_oauth, methods=["GET"])
+
     routes.add_api_route("/destination/oauth/{ad_platform}", connection_handler.get_auth_url, methods=["GET"])
     routes.add_api_route("/destination/oauth/{ad_platform}/callback", connection_handler.get_oauth_token, methods=["GET"])
 

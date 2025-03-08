@@ -60,3 +60,5 @@ class Config:
     OPEN_AI_KEY = os.getenv("OPEN_AI_KEY", "")
 
     # GOOGLE_APPLICATION_CREDENTIALS = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+    SHOPIFY_CLIENT_ID = os.getenv("SHOPIFY_CLIENT_ID", "")
+    SHOPIFY_SECRET_KEY = os.getenv("SHOPIFY_SECRET_KEY", "")
