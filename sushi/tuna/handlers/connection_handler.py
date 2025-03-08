@@ -56,7 +56,8 @@ class ConnectionHandler:
             # await store_shop_data(shop, access_token)
             
             # 5. Redirect back to Shopify admin
-            return RedirectResponse(url=f"https://{shop}/admin/apps")
+            # return RedirectResponse(url=f"https://{shop}/admin/apps")
+            return RedirectResponse(url=f"https://figsprout.netlify.app/dashboard")
         except Exception as e:
             print(f"Error in shopify oauth due to {str(e)} ")
             raise HTTPException(status_code=403, detail="Shopify Login Failed. Please Try Again.")
@@ -129,11 +130,13 @@ async def create_web_pixel(shop: str, access_token: str):
     )
 
     print(response)
-    
+    result = response.json()
     if response.status_code != 200:
+        if response.get('code') == "TAKEN":
+            return True
         raise Exception(f"Failed to create web pixel: {response.text}")
     
-    result = response.json()
+    
     
     # Check for errors in the GraphQL response
     if "errors" in result or result.get("data", {}).get("webPixelCreate", {}).get("userErrors", []):
