@@ -1,6 +1,7 @@
 from openai import OpenAI
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
+from tuna.dtos.shopify_dao import ShopifyDAO
 from tuna.handlers.pixel_handler import PixelHandler
 from tuna.handlers.ad_handler import AdHandler
 from tuna.services.ad_service import AdService
@@ -51,33 +52,22 @@ def initialize():
     pg_db = get_db("postgres")
     session = pg_db.create_db()
   
+    # set up daos
     company_dao = MemberDAO(db=session)
-    home_service = HomeService(company_dao)
-    home_handler = HomeHandler(home_service)
-
+    shopify_dao = ShopifyDAO(session)
     ad_dao = AdDAO(db=session)
+
+    # set up services
+    home_service = HomeService(company_dao, shopify_dao)
     ad_service = AdService(ad_dao)
-    connection_handler = ConnectionHandler(ad_service)
-
+    
+    # set up handlers
+    home_handler = HomeHandler(home_service)
+    connection_handler = ConnectionHandler(ad_service, home_service)
     ad_handler = AdHandler(ad_service)
-
     pixel_handler = PixelHandler()
 
-    @app.on_event("shutdown")
-    async def shutdown():
-        logger.info("Shutting down application; disconnecting db...")
-        await pg_db.dispose()
-
-    @app.on_event("startup")
-    async def startup():
-        try:
-            logger.info("Testing database connection...")
-            await pg_db.test_connection()
-            logger.info("Database connection successful")
-        except Exception as e:
-            logger.error(f"Failed to initialize database: {e}")
-            raise
-
+    #set up routes
     routes = APIRouter(prefix="/api/v1")
     routes.add_api_route("/health", home_handler.health, methods=["GET"])
     routes.add_api_route("/login", home_handler.login_member, methods=["POST"])
@@ -98,6 +88,23 @@ def initialize():
     routes.add_api_route("/pixel", pixel_handler.process_event, methods=["POST"])
 
     app.include_router(routes)
+
+    @app.on_event("shutdown")
+    async def shutdown():
+        logger.info("Shutting down application; disconnecting db...")
+        await pg_db.dispose()
+
+    @app.on_event("startup")
+    async def startup():
+        try:
+            logger.info("Testing database connection...")
+            await pg_db.test_connection()
+            logger.info("Database connection successful")
+        except Exception as e:
+            logger.error(f"Failed to initialize database: {e}")
+            raise
+
+
     return app
 
 app = initialize()

@@ -20,9 +20,16 @@ class HomeHandler:
         self.hs = hs
 
     async def health(self):
-        return await self.hs.get_home()
+        return await self.hs.test()
     
     async def verify_auth(self, request: Request):
+        member = request.state.member
+        
+        query_params = dict(request.query_params)
+        store = query_params.pop("store", None)
+        if store: 
+            self.hs.connect_shopify_store(member["organization_id"], store)
+
         return request.state.member
         # return {"status": "ok"}
     

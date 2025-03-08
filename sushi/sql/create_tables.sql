@@ -53,3 +53,16 @@ CREATE TABLE ad_accounts (
 
 -- Add an index on organization_id for faster lookups
 CREATE INDEX idx_organization_id ON ad_accounts (organization_id);
+
+
+CREATE TABLE shopify_connections (
+    id SERIAL PRIMARY KEY,
+    shopify_store TEXT NOT NULL UNIQUE,
+    access_token TEXT NOT NULL,
+    organization_id INT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+
+    CONSTRAINT fk_organization FOREIGN KEY (organization_id) 
+    REFERENCES organizations(organization_id) ON DELETE SET NULL
+);

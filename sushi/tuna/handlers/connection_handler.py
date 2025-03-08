@@ -1,3 +1,4 @@
+from tuna.services.home_service import HomeService
 from tuna.services.ad_service import AdService
 from tuna.integrations.destinations.connection import AdOAuthClient
 from fastapi.responses import RedirectResponse
@@ -17,8 +18,9 @@ from tuna.config import Config
 logger = logging.getLogger(__name__)
 
 class ConnectionHandler:
-    def __init__(self, ads: AdService):
+    def __init__(self, ads: AdService, hs: HomeService):
         self.ads = ads
+        self.hs = hs
 
     def get_auth_url(self, ad_platform:str, callback_url:str):
         try:
@@ -38,31 +40,31 @@ class ConnectionHandler:
             # to do: redirect back to app w/ error param
             raise HTTPException(status_code=400, detail=str(e))
         
-    async def shopify_oauth(request: Request, shop: str, id_token: str):
-        """Handle OAuth callback from Shopify"""
+    # async def shopify_oauth(request: Request, shop: str, id_token: str):
+    #     """Handle OAuth callback from Shopify"""
         
-        try: 
-            print("in shopifiy oauth...")
-            # 1. Verify the HMAC signature
-            # if not verify_hmac(request, Config.SHOPIFY_SECRET_KEY):
-            #     raise HTTPException(status_code=403, detail="Invalid HMAC signature")
+    #     try: 
+    #         print("in shopifiy oauth...")
+    #         # 1. Verify the HMAC signature
+    #         # if not verify_hmac(request, Config.SHOPIFY_SECRET_KEY):
+    #         #     raise HTTPException(status_code=403, detail="Invalid HMAC signature")
             
-            # 2. Exchange code for access token
-            access_token = await exchange_code_for_token(shop, id_token)
+    #         # 2. Exchange code for access token
+    #         access_token = await exchange_code_for_token(shop, id_token)
             
-            # 3. Auto-register the web pixel
-            await create_web_pixel(shop, access_token)
-            print("successfully installed shopify oauth...")
+    #         # 3. Auto-register the web pixel
+    #         await create_web_pixel(shop, access_token)
+    #         print("successfully installed shopify oauth...")
             
-            # # 4. Store shop data in your database
-            # await store_shop_data(shop, access_token)
+    #         # # 4. Store shop data in your database
+    #         # await store_shop_data(shop, access_token)
             
-            # 5. Redirect back to Shopify admin
-            # return RedirectResponse(url=f"https://{shop}/admin/apps")
-            return RedirectResponse(url=f"https://figsprout.netlify.app/dashboard")
-        except Exception as e:
-            print(f"Error in shopify oauth due to {str(e)} ")
-            raise HTTPException(status_code=403, detail="Shopify Login Failed. Please Try Again.")
+    #         # 5. Redirect back to Shopify admin
+    #         # return RedirectResponse(url=f"https://{shop}/admin/apps")
+    #         return RedirectResponse(url=f"https://figsprout.netlify.app/dashboard")
+    #     except Exception as e:
+    #         print(f"Error in shopify oauth due to {str(e)} ")
+    #         raise HTTPException(status_code=403, detail="Shopify Login Failed. Please Try Again.")
 
    
 # async def exchange_code_for_token(shop: str, id_token: str):
@@ -102,7 +104,7 @@ class ConnectionHandler:
             
             # Build redirect URL for authorization
             redirect_uri = "https://sushi-api-951508746812.asia-southeast1.run.app/api/v1/shopify/oauth/callback"
-            scopes = "write_pixels,read_customer_events"
+            scopes = "write_pixels,read_customer_events,read_orders,read_financials"
             
             auth_url = (
                 f"https://{shop}/admin/oauth/authorize?"
@@ -140,6 +142,8 @@ class ConnectionHandler:
             # Register the web pixel with the shop
             await create_web_pixel(shop, access_token)
             print("Successfully installed Shopify web pixel")
+
+            await self.hs.create_shopify_store(shop, access_token)
             
             # Get shop details (optional but useful)
             # shop_details = await get_shop_details(shop, access_token)
@@ -150,7 +154,7 @@ class ConnectionHandler:
             # Direct 3xx redirect to your external app
             # Include relevant shop data your app needs
             redirect_url = (
-                f"https://figsprout.netlify.app/connect?"
+                f"https://figsprout.netlify.app/dashboard?"
                 f"shop={shop}"
                 # f"shop_name={urllib.parse.quote(shop_details.get('name', ''))}&"
                 # f"email={urllib.parse.quote(shop_details.get('email', ''))}&"
