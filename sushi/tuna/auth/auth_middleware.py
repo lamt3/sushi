@@ -15,7 +15,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 async def auth_middleware(request: Request, call_next):
     # List of paths that don't need authentication
-    public_paths = ["/api/v1/login", "/api/v1/health", "/api/v1/pixel"]
+    public_paths = ["/api/v1/login", "/api/v1/health", "/api/v1/pixel", "/api/v1/shopify/oauth"]
     
     if request.url.path in public_paths:
         return await call_next(request)
