@@ -102,32 +102,30 @@ async def create_web_pixel(shop: str, access_token: str):
     
     # GraphQL mutation to create web pixel
     query = """
-    mutation webPixelCreate($data: WebPixelInput!) {
-        webPixelCreate(data: $data) {
+    mutation {
+        webPixelCreate(webPixel: { settings: SETTINGS_JSON }) {
             userErrors {
+                code
                 field
                 message
             }
             webPixel {
-                id
                 settings
+                id
             }
         }
     }
     """
     
-    # Include the account ID in settings
-    variables = {
-        "data": {
-            "settings": json.dumps({"accountID": account_id})
-        }
-    }
+    # Replace the settings JSON placeholder with properly escaped JSON
+    settings_json = json.dumps({"accountID": account_id})
+    query = query.replace("SETTINGS_JSON", json.dumps(settings_json))
     
     # Make the request
     response = requests.post(
         url,
         headers=headers,
-        json={"query": query, "variables": variables}
+        json={"query": query}
     )
 
     print(response)
