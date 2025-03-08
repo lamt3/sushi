@@ -10,6 +10,8 @@ import hmac
 import hashlib
 import base64
 import json
+import urllib.parse
+import secrets
 from tuna.config import Config
 
 logger = logging.getLogger(__name__)
@@ -63,26 +65,161 @@ class ConnectionHandler:
             raise HTTPException(status_code=403, detail="Shopify Login Failed. Please Try Again.")
 
    
-async def exchange_code_for_token(shop: str, id_token: str):
-    """Exchange authorization code for permanent access token"""
+# async def exchange_code_for_token(shop: str, id_token: str):
+#     """Exchange authorization code for permanent access token"""
     
-    token_url = f"https://{shop}/admin/oauth/access_token"
-    payload = {
+#     token_url = f"https://{shop}/admin/oauth/access_token"
+#     payload = {
+#         "client_id": Config.SHOPIFY_CLIENT_ID,
+#         "client_secret": Config.SHOPIFY_SECRET_KEY,
+#         "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+#         "subject_token": id_token,
+#         "subject_token_type": "urn:ietf:params:oauth:token-type:id_token",
+#         "requested_token_type": "urn:shopify:params:oauth:token-type:online-access-token"
+#     }
+    
+#     response = requests.post(token_url, json=payload)
+    
+#     if response.status_code != 200:
+#         raise Exception(f"Failed to get access token: {response.text}")
+    
+#     data = response.json()
+#     return data.get("access_token")
+    async def initiate_shopify_oauth(self, request: Request, shop: str):
+        """Start Shopify OAuth process with shop parameter"""
+        try:
+            # Verify shop parameter is valid
+            if not shop or not shop.strip():
+                raise HTTPException(status_code=400, detail="Shop parameter is required")
+            
+            # Clean shop parameter
+            shop = shop.strip()
+            if not shop.endswith('myshopify.com'):
+                shop = f"{shop}.myshopify.com"
+            
+            # Generate a nonce for security
+            nonce = secrets.token_hex(16)
+            
+            # Build redirect URL for authorization
+            redirect_uri = "https://sushi-api-951508746812.asia-southeast1.run.app/api/v1/shopify/oauth"
+            scopes = "write_pixels,read_customer_events"
+            
+            auth_url = (
+                f"https://{shop}/admin/oauth/authorize?"
+                f"client_id={Config.SHOPIFY_CLIENT_ID}&"
+                f"scope={scopes}&"
+                f"redirect_uri={urllib.parse.quote(redirect_uri)}&"
+                f"state={nonce}"
+            )
+            
+            # Since this is a non-embedded app, we can do a direct 3xx redirect
+            return RedirectResponse(url=auth_url)
+            
+        except Exception as e:
+            print(f"Error initiating Shopify OAuth: {str(e)}")
+            raise HTTPException(status_code=400, detail=str(e))
+    
+    # Step 2: Handle OAuth callback
+    async def shopify_oauth(self, request: Request, shop: str = None, code: str = None, state: str = None):
+        """Handle OAuth callback from Shopify"""
+        
+        try: 
+            print(f"In Shopify OAuth with shop: {shop}, state: {state}")
+            
+            # # Verify HMAC signature
+            # if not verify_hmac(request, Config.SHOPIFY_SECRET_KEY):
+            #     raise HTTPException(status_code=403, detail="Invalid HMAC signature")
+            
+            # # Validate shop parameter
+            # if not shop or not is_valid_shop(shop):
+            #     raise HTTPException(status_code=400, detail="Invalid shop parameter")
+            
+            # Exchange authorization code for access token
+            access_token = exchange_code_for_token(shop, code)
+            
+            # Register the web pixel with the shop
+            await create_web_pixel(shop, access_token)
+            print("Successfully installed Shopify web pixel")
+            
+            # Get shop details (optional but useful)
+            # shop_details = await get_shop_details(shop, access_token)
+            
+            # Create a secure token for verification in your app
+            # token = create_secure_token(shop, shop_details)
+            
+            # Direct 3xx redirect to your external app
+            # Include relevant shop data your app needs
+            redirect_url = (
+                f"https://figsprout.netlify.app/connect?"
+                f"shop={shop}"
+                # f"shop_name={urllib.parse.quote(shop_details.get('name', ''))}&"
+                # f"email={urllib.parse.quote(shop_details.get('email', ''))}&"
+                # f"token={token}"
+            )
+            
+            # Use status_code=303 as recommended for 3xx redirects after POST
+            return RedirectResponse(url=redirect_url, status_code=303)
+            
+        except Exception as e:
+            print(f"Error in Shopify OAuth: {str(e)}")
+            raise HTTPException(status_code=403, detail=f"Shopify Login Failed: {str(e)}")
+
+# Helper functions
+
+def verify_hmac(request: Request, api_secret: str) -> bool:
+    """Verify the HMAC signature from Shopify"""
+    
+    # Get query parameters
+    query_params = dict(request.query_params)
+    hmac_value = query_params.pop("hmac", None)
+    
+    if not hmac_value:
+        return False
+    
+    # Sort parameters alphabetically
+    sorted_params = sorted(query_params.items())
+    
+    # Join parameters as key=value&key2=value2
+    message = "&".join([f"{key}={value}" for key, value in sorted_params])
+    
+    # Create HMAC hash
+    digest = hmac.new(
+        api_secret.encode('utf-8'),
+        message.encode('utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+    
+    # Compare computed HMAC with provided HMAC
+    return hmac.compare_digest(digest, hmac_value)
+
+def is_valid_shop(shop: str) -> bool:
+    """Validate shop parameter format"""
+    import re
+    pattern = r'^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$'
+    return bool(re.match(pattern, shop))
+
+def exchange_code_for_token(shop: str, code: str):
+    """Exchange authorization code for access token"""
+    url = f"https://{shop}/admin/oauth/access_token"
+    
+    data = {
         "client_id": Config.SHOPIFY_CLIENT_ID,
         "client_secret": Config.SHOPIFY_SECRET_KEY,
-        "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
-        "subject_token": id_token,
-        "subject_token_type": "urn:ietf:params:oauth:token-type:id_token",
-        "requested_token_type": "urn:shopify:params:oauth:token-type:online-access-token"
+        "code": code
     }
     
-    response = requests.post(token_url, json=payload)
+    response = requests.post(url, json=data)
     
     if response.status_code != 200:
         raise Exception(f"Failed to get access token: {response.text}")
     
-    data = response.json()
-    return data.get("access_token")
+    result = response.json()
+    access_token = result.get("access_token")
+    
+    if not access_token:
+        raise Exception("No access token received from Shopify")
+    
+    return access_token
 
 
 async def create_web_pixel(shop: str, access_token: str):
@@ -132,7 +269,7 @@ async def create_web_pixel(shop: str, access_token: str):
     print(response)
     result = response.json()
     if response.status_code != 200:
-        if response.get('code') == "TAKEN":
+        if result.get('code') == "TAKEN":
             return True
         raise Exception(f"Failed to create web pixel: {response.text}")
     
@@ -149,25 +286,25 @@ async def create_web_pixel(shop: str, access_token: str):
     return result
 
 
-def verify_hmac(request: Request, api_secret: str) -> bool:
-    """Verify the HMAC signature from Shopify"""
+# def verify_hmac(request: Request, api_secret: str) -> bool:
+#     """Verify the HMAC signature from Shopify"""
     
-    # Get query parameters
-    query_params = dict(request.query_params)
-    hmac_value = query_params.pop("hmac")
+#     # Get query parameters
+#     query_params = dict(request.query_params)
+#     hmac_value = query_params.pop("hmac")
     
-    # Sort parameters alphabetically
-    sorted_params = sorted(query_params.items())
+#     # Sort parameters alphabetically
+#     sorted_params = sorted(query_params.items())
     
-    # Join parameters as key=value&key2=value2
-    message = "&".join([f"{key}={value}" for key, value in sorted_params])
+#     # Join parameters as key=value&key2=value2
+#     message = "&".join([f"{key}={value}" for key, value in sorted_params])
     
-    # Create HMAC hash
-    digest = hmac.new(
-        api_secret.encode('utf-8'),
-        message.encode('utf-8'),
-        hashlib.sha256
-    ).hexdigest()
+#     # Create HMAC hash
+#     digest = hmac.new(
+#         api_secret.encode('utf-8'),
+#         message.encode('utf-8'),
+#         hashlib.sha256
+#     ).hexdigest()
     
-    # Compare computed HMAC with provided HMAC
-    return hmac.compare_digest(digest, hmac_value)
+#     # Compare computed HMAC with provided HMAC
+#     return hmac.compare_digest(digest, hmac_value)
