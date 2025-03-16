@@ -65,6 +65,14 @@ class HomeHandler:
     async def approve_member_to_organization(self):
         return await self.hs.get_home()
     
+    async def get_shopify_store(self, request: Request):
+        m = request.state.member
+        print(m)
+        org_id = m["organization_id"]
+        print(org_id)
+        await self.hs.get_shopify_products(org_id)
+
+    
     async def get_dashboard(self, request: Request):
         print(request.cookies.get("token"))
         print()

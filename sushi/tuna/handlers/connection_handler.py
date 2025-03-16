@@ -104,7 +104,7 @@ class ConnectionHandler:
             
             # Build redirect URL for authorization
             redirect_uri = "https://sushi-api-951508746812.asia-southeast1.run.app/api/v1/shopify/oauth/callback"
-            scopes = "write_pixels,read_customer_events,read_orders,read_financials"
+            scopes = "write_pixels,read_customer_events,read_orders, read_products"
             
             auth_url = (
                 f"https://{shop}/admin/oauth/authorize?"

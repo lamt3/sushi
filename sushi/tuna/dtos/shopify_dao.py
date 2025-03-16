@@ -45,3 +45,30 @@ class ShopifyDAO:
                 .params(params)
                 .execute_write()
         )
+
+    async def get_shopify_access_token(self, organization_id):
+        query = """
+        select * 
+        FROM shopify_connections
+        WHERE organization_id = :organization_id
+        """
+        params = {
+            "organization_id": organization_id,
+        }
+        session: AsyncSession = self.db()
+        qb = QueryBuilder()
+        return await (
+            qb.session(session)
+                .query(query)
+                .params(params)
+                .execute_read(lambda r: self._map(r))
+        )
+    
+    def _map(self, r: Result):
+        row = r.mappings().first()
+        print('here in row')
+        print(row)
+        return {
+            "access_token": row["access_token"],
+            "shopify_store": row["shopify_store"]
+        }

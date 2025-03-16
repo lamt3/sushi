@@ -41,4 +41,76 @@ class HomeService:
 
     async def create_shopify_store(self, shopify_store, access_token):
         await self.sdao.insert_shopify_store(shopify_store, access_token)
+
+    async def get_shopify_products(self, organization_id):
+        r = await self.sdao.get_shopify_access_token(organization_id)
+        print(r)
+        shopify_store = r["shopify_store"]
+        access_token = r["access_token"]
+        # url = f"https://{shopify_store}/admin/api/2025-01/graphql.json"
+        # headers = {
+        #     "X-Shopify-Access-Token": access_token,
+        #     "Content-Type": "application/json"
+        # }
+        # query = {
+        #     "query": """
+        #     {
+        #     products(first: 50) {
+        #         edges {
+        #         node {
+        #             id
+        #             title
+        #             description
+        #             variants(first: 10) {
+        #             edges {
+        #                 node {
+        #                 id
+        #                 title
+        #                 price
+        #                 }
+        #             }
+        #             }
+        #         }
+        #         }
+        #     }
+        #     }
+        #     """
+        # }
+        url = f"https://{shopify_store}/admin/api/2023-04/graphql.json"
+        headers = {
+            "X-Shopify-Access-Token": access_token,
+            "Content-Type": "application/json"
+        }
+        query = {
+            "query": """
+            {
+            orders(first: 50) {
+                edges {
+                node {
+                    id
+                    name
+                    email
+                    lineItems(first: 10) {
+                    edges {
+                        node {
+                        title
+                        quantity
+                        }
+                    }
+                    }
+                }
+                }
+            }
+            }
+            """
+        }
+       
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            print(response.json())
+        else:
+            print("Error fetching products:", response.json())
+            return {}
+        
+
         

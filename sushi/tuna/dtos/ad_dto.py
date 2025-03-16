@@ -89,6 +89,7 @@ class AdPlatform(Enum):
     LINKEDIN = "LINKEDIN"
     X = "X"
     REDDIT = "REDDIT"
+    GOOGLE_ADS = "GOOGLE_ADS"
 
 class TemplateType(Enum):
     CUSTOM = "CUSTOM"
